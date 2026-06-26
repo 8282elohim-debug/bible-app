@@ -233,13 +233,12 @@
         }
 
         function displayHymnImage(num) {
-            const hymnDisplay = document.getElementById('hymnDisplay');
-            const paddedNum = String(num).padStart(3, '0');
-            const fileName = encodeURIComponent('새찬송가_' + paddedNum + '.jpg');
-            const imageUrl = 'https://github.com/8282elohim-debug/bible-app/blob/main/hymns/' + fileName + '?raw=true';
-            
-            hymnDisplay.innerHTML = '<div><p style="margin-bottom: 10px; font-weight: bold; color: #2c3e50;">찬송가 ' + num + '번</p><img src="' + imageUrl + '" alt="찬송가 ' + num + '번" class="hymn-image" onerror="this.parentElement.innerHTML=\'<p style=&quot;color: #999;&quot;>이미지를 불러올 수 없습니다</p>\'"></div>';
-        }
+    const hymnDisplay = document.getElementById('hymnDisplay');
+    const paddedNum = String(num).padStart(3, '0');
+    const imageUrl = 'https://raw.githubusercontent.com/8282elohim-debug/bible-app/main/hymns/%E1%84%89%E1%85%A2%E1%84%8E%E1%85%A1%E1%86%AB%E1%84%89%E1%85%A9%E1%86%BC%E1%84%80%E1%85%A1_' + paddedNum + '.jpg';
+    
+    hymnDisplay.innerHTML = '<div><p style="margin-bottom: 10px; font-weight: bold; color: #2c3e50;">찬송가 ' + num + '번</p><img src="' + imageUrl + '" alt="찬송가 ' + num + '번" class="hymn-image" onerror="this.parentElement.innerHTML=\'<p style=&quot;color: #999;&quot;>이미지를 불러올 수 없습니다</p>\'"></div>';
+}
 
         function initReading() {
             if (!biblesData || !biblesData.readingPlan) return;

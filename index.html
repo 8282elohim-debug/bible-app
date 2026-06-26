@@ -121,22 +121,36 @@
             '벧후': 3, '요일': 5, '요이': 1, '요삼': 1, '유': 1, '계': 22
         };
 
-        const VERSES = {
-            '마1': [{ v: 1, title: '예수 그리스도의 계보', text: '아브라함과 다윗의 자손 예수 그리스도의 계보라' }, { v: 21, text: '아들을 낳으리니 이름을 예수라 하라 이는 그가 자기 백성을 그들의 죄에서 구원할 자이심이라' }],
-            '마2': [{ v: 1, text: '헤롯 왕 때에 예수께서 유대 베들레헴에서 나시매 동방으로부터 박사들이 예루살렘에 이르러' }, { v: 11, text: '집에 들어가 아기와 그의 어머니 마리아가 함께 있는 것을 보고 엎드려 아기께 경배하고' }],
-            '창1': [{ v: 1, title: '천지 창조', text: '태초에 하나님이 천지를 창조하시니라' }, { v: 3, text: '하나님이 이르시되 빛이 있으라 하시니 빛이 있었고' }, { v: 27, text: '하나님이 자기 형상 곧 하나님의 형상대로 사람을 창조하시되 남자와 여자를 창조하시고' }],
-            '창2': [{ v: 1, text: '천지와 만물이 다 이루어지니라' }, { v: 2, title: '일곱째 날', text: '하나님이 일곱째 날을 거룩하게 하시고 복을 주셨으니' }],
-            '행1': [{ v: 1, text: '데오빌로여 내가 먼저 쓴 글에서 예수께서 하신 모든 일과 가르치신 것을 기록하였으나' }, { v: 8, text: '오직 성령이 너희에게 임하시면 너희가 예루살렘과 온 유대와 사마리아와 땅 끝까지 이르러 내 증인이 되리라' }],
-            '행2': [{ v: 1, text: '오순절 날이 이미 이르매 저희가 다 한 곳에 모였더니' }, { v: 4, text: '저희가 다 성령의 충만함을 받고 성령이 말하게 하심을 따라 다른 방언으로 말하기를 시작하니라' }],
-            '요1': [{ v: 1, title: '말씀이 육신이 되심', text: '태초에 말씀이 계시니라 이 말씀이 하나님과 함께 계셨으니 이 말씀은 곧 하나님이시니라' }, { v: 14, text: '말씀이 육신이 되어 우리 가운데 거하시매 우리가 그의 영광을 보니' }],
-            '눅1': [{ v: 1, text: '우리 중에 이루어진 사실에 대하여 처음부터 목격한 자들과 말씀의 종된 자들이 전하여 준 그대로' }, { v: 26, text: '여섯째 달에 천사 가브리엘이 하나님께로부터 갈릴리 나사렛 동네에 보내심을 받아' }],
-            '롬1': [{ v: 1, text: '예수 그리스도의 종 바울은 사도로 부르심을 받아 하나님의 복음을 위하여 구별함을 받았으니' }, { v: 16, text: '내가 복음을 부끄러워하지 아니하노니 이 복음은 모든 믿는 자에게 구원을 주시는 하나님의 능력이 됨이라' }],
-            '고전13': [{ v: 1, text: '내가 사람의 방언과 천사의 말을 할지라도 사랑이 없으면 울리는 꽹과리나 울리는 종이 되고' }, { v: 13, text: '그런즉 믿음, 소망, 사랑, 이 세 가지는 항상 있을 것인데 그 중의 제일은 사랑이라' }],
-            '엡2': [{ v: 8, text: '너희가 그 은혜를 통하여 믿음으로 말미암아 구원을 받았으니 이것이 너희에게서 난 것이 아니요 하나님의 선물이라' }, { v: 10, text: '우리는 그의 만드신 바라 그리스도 예수 안에서 선한 일을 위하여 지으심을 받은 자니' }],
-            '빌4': [{ v: 6, text: '아무것도 염려하지 말고 오직 모든 일에 기도와 간구로 너희 구할 것을 감사함으로 하나님께 아뢰라' }, { v: 13, text: '내게 능력 주시는 자 안에서 내가 모든 것을 할 수 있느니라' }],
-            '히11': [{ v: 1, title: '믿음의 정의', text: '믿음은 바라는 것들의 실상이요 보이지 않는 것들의 증거니' }, { v: 6, text: '믿음이 없이는 하나님을 기쁘시게 하지 못하나니' }],
-            '계21': [{ v: 1, text: '또 내가 새 하늘과 새 땅을 보니 처음 하늘과 처음 땅이 없어졌고 바다도 다시 있지 않더라' }, { v: 4, text: '하나님이 저희 모든 눈물을 씻어 주실 것이니 다시 사망이 없고' }]
-        };
+     // JSON에서 데이터 로드
+        let VERSES = {};
+        let isLoading = true;
+
+        fetch('https://raw.githubusercontent.com/8282elohim-debug/bible-app/main/bible_complete.json')
+            .then(r => r.json())
+            .then(data => {
+                // 데이터 변환
+                const processVerses = (testamentData) => {
+                    const result = {};
+                    for (let [book, bookData] of Object.entries(testamentData)) {
+                        for (let [chapter, verseList] of Object.entries(bookData.chapters || {})) {
+                            const key = book + chapter;
+                            result[key] = verseList || [];
+                        }
+                    }
+                    return result;
+                };
+
+                VERSES = {
+                    ...processVerses(data.ot || {}),
+                    ...processVerses(data.nt || {})
+                };
+                isLoading = false;
+                renderVerses();
+            })
+            .catch(e => {
+                console.log('데이터 로드 실패:', e);
+                isLoading = false;
+            });
 
         let currentTestament = 'nt';
         let currentBook = '마';
@@ -192,22 +206,29 @@
             renderVerses();
         }
 
-        function renderVerses() {
+      function renderVerses() {
             const bookName = currentTestament === 'nt' ? BOOKS_NT[currentBook] : BOOKS_OT[currentBook];
             const key = currentBook + currentChapter;
             const verses = VERSES[key] || [];
 
             let html = `<h3 style="margin-bottom: 12px; color: #2c3e50;">${bookName} ${currentChapter}장</h3>`;
+            
             if (verses.length > 0) {
                 verses.forEach(v => {
+                    const verse = typeof v === 'string' ? JSON.parse(v) : v;
+                    const title = verse.title || '';
+                    const content = verse.content || '';
+                    const verseNum = verse.verse || 1;
+                    
                     html += `<div class="verse">`;
-                    if (v.title) html += `<div class="verse-title">⟨${v.title}⟩</div>`;
-                    html += `<div class="verse-text"><span class="verse-num">${currentBook}${currentChapter}:${v.v}</span>${v.text}</div>`;
+                    if (title) html += `<div class="verse-title">⟨${title}⟩</div>`;
+                    html += `<div class="verse-text"><span class="verse-num">${currentBook}${currentChapter}:${verseNum}</span> ${content}</div>`;
                     html += `</div>`;
                 });
             } else {
-                html += `<p style="color: #999; font-size: 12px;">📖 이 장의 전체 구절을 보려면<br>JSON 데이터 파일을 사용하세요.</p>`;
+                html += `<p style="color: #999; font-size: 14px; margin-top: 20px;">📖 로딩 중...</p>`;
             }
+            
             document.getElementById('verseList').innerHTML = html;
         }
 

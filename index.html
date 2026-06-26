@@ -101,7 +101,9 @@
         const BOOKS_NT = {'마': '마태복음', '막': '마가복음', '눅': '누가복음', '요': '요한복음', '행': '사도행전', '롬': '로마서', '고전': '고린도전서', '고후': '고린도후서', '갈': '갈라디아서', '엡': '에베소서', '빌': '빌립보서', '골': '골로새서', '살전': '데살로니가전서', '살후': '데살로니가후서', '딤전': '디모데전서', '딤후': '디모데후서', '딛': '디도서', '몬': '빌레몬서', '히': '히브리서', '약': '야고보서', '벧전': '베드로전서', '벧후': '베드로후서', '요일': '요한일서', '요이': '요한이서', '요삼': '요한삼서', '유': '유다서', '계': '요한계시록'};
         
         let biblesData = null;
-        let currentTestament = 'nt', currentBook = '마', currentChapter = 1;
+        let currentTestament = 'nt';
+        let currentBook = '마';
+        let currentChapter = 1;
         let selectedHymnNum = 0;
 
         async function loadData() {
@@ -204,7 +206,8 @@
 
         function searchHymns() {
             const search = document.getElementById('hymnSearch').value || '';
-            let start = 1, end = 20;
+            let start = 1;
+            let end = 20;
             if (search) {
                 const num = parseInt(search);
                 if (!isNaN(num)) {
@@ -229,12 +232,13 @@
             searchHymns();
         }
 
-      function displayHymnImage(num) {
-    const hymnDisplay = document.getElementById('hymnDisplay');
-    const paddedNum = String(num).padStart(3, '0');
-    const fileName = encodeURIComponent(`새찬송가_${paddedNum}.jpg`);
-    const imageUrl = `https://github.com/8282elohim-debug/bible-app/blob/main/hymns/${fileName}?raw=true`;
-            `;
+        function displayHymnImage(num) {
+            const hymnDisplay = document.getElementById('hymnDisplay');
+            const paddedNum = String(num).padStart(3, '0');
+            const fileName = encodeURIComponent('새찬송가_' + paddedNum + '.jpg');
+            const imageUrl = 'https://github.com/8282elohim-debug/bible-app/blob/main/hymns/' + fileName + '?raw=true';
+            
+            hymnDisplay.innerHTML = '<div><p style="margin-bottom: 10px; font-weight: bold; color: #2c3e50;">찬송가 ' + num + '번</p><img src="' + imageUrl + '" alt="찬송가 ' + num + '번" class="hymn-image" onerror="this.parentElement.innerHTML=\'<p style=&quot;color: #999;&quot;>이미지를 불러올 수 없습니다</p>\'"></div>';
         }
 
         function initReading() {
@@ -243,10 +247,10 @@
             const today = new Date();
             const month = today.getMonth() + 1;
             const date = today.getDate();
-            document.getElementById('todayDate').innerHTML = `${today.getFullYear()}년 ${month}월 ${date}일`;
+            document.getElementById('todayDate').innerHTML = today.getFullYear() + '년 ' + month + '월 ' + date + '일';
             
-            const monthStr = `${month}월`;
-            const dayStr = `${date}일`;
+            const monthStr = month + '월';
+            const dayStr = date + '일';
             
             if (biblesData.readingPlan[monthStr] && biblesData.readingPlan[monthStr][dayStr]) {
                 const reading = biblesData.readingPlan[monthStr][dayStr];
@@ -261,20 +265,18 @@
                     if (!item.c) return;
                     const m = item.c.match(/^([가-힣]+)(\d+)(?::(\d+)~(\d+))?/);
                     if (m) {
-                        const b = m[1], ch = parseInt(m[2]);
+                        const b = m[1];
+                        const ch = parseInt(m[2]);
                         const startVerse = m[3] ? parseInt(m[3]) : null;
                         const endVerse = m[4] ? parseInt(m[4]) : null;
                         const bn = BOOKS_OT[b] || BOOKS_NT[b] || b;
                         
-                        let rangeText = `${bn} ${ch}장`;
+                        let rangeText = bn + ' ' + ch + '장';
                         if (startVerse && endVerse) {
-                            rangeText = `${bn} ${ch}:${startVerse}~${endVerse}`;
+                            rangeText = bn + ' ' + ch + ':' + startVerse + '~' + endVerse;
                         }
                         
-                        html += `<div class="reading-item" onclick="goToVerse('${b}', ${ch})">
-                            <div class="reading-label">${item.l}</div>
-                            <div class="reading-book">${rangeText}</div>
-                        </div>`;
+                        html += '<div class="reading-item" onclick="goToVerse(\'' + b + '\', ' + ch + ')"><div class="reading-label">' + item.l + '</div><div class="reading-book">' + rangeText + '</div></div>';
                     }
                 });
                 document.getElementById('readingList').innerHTML = html;

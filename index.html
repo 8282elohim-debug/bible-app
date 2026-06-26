@@ -6,92 +6,149 @@
     <title>📖 성경·찬송가 앱</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        body { font-family: Arial, sans-serif; transition: background 0.3s, color 0.3s; }
+        
+        /* 라이트 테마 (기본) */
+        body.light-theme {
+            background: #f5f5f5;
+            color: #333;
+        }
+        body.light-theme header { background: #2c3e50; }
+        body.light-theme .tabs { background: white; border-bottom: 2px solid #ddd; }
+        body.light-theme .tab-btn { background: white; color: #333; border: none; }
+        body.light-theme .tab-btn.active { background: #3498db; color: white; }
+        body.light-theme .controls-area { background: white; border-bottom: 1px solid #ddd; }
+        body.light-theme select, body.light-theme input { background: white; color: #333; border: 1px solid #ddd; }
+        body.light-theme .content-area { background: white; }
+        body.light-theme .verse-title { color: #666; }
+        body.light-theme .hymn-display { background: white; }
+        body.light-theme .hymn-num { background: #f9f9f9; color: #3498db; border: 1px solid #ddd; }
+        
+        /* 다크 테마 */
+        body.dark-theme {
+            background: #1e1e1e;
+            color: #e0e0e0;
+        }
+        body.dark-theme header { background: #0d1117; }
+        body.dark-theme .tabs { background: #2d2d2d; border-bottom: 2px solid #444; }
+        body.dark-theme .tab-btn { background: #2d2d2d; color: #e0e0e0; border: none; }
+        body.dark-theme .tab-btn.active { background: #3498db; color: white; }
+        body.dark-theme .controls-area { background: #2d2d2d; border-bottom: 1px solid #444; }
+        body.dark-theme select, body.dark-theme input { background: #3d3d3d; color: #e0e0e0; border: 1px solid #555; }
+        body.dark-theme .content-area { background: #1e1e1e; }
+        body.dark-theme .verse-title { color: #999; }
+        body.dark-theme .hymn-display { background: #2d2d2d; }
+        body.dark-theme .hymn-num { background: #3d3d3d; color: #64b5f6; border: 1px solid #555; }
+        
         #app { height: 100vh; display: flex; flex-direction: column; }
-        header { background: #2c3e50; color: white; padding: 15px; text-align: center; }
-        header h1 { font-size: 20px; margin-bottom: 5px; }
-        header p { font-size: 12px; opacity: 0.8; }
-        .tabs { display: flex; background: white; border-bottom: 2px solid #ddd; }
-        .tab-btn { flex: 1; padding: 12px; border: none; background: white; cursor: pointer; font-size: 14px; font-weight: bold; color: #333; }
+        header { color: white; padding: 15px; text-align: center; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 20px; margin-bottom: 0; }
+        .theme-toggle { background: none; border: 2px solid white; color: white; padding: 8px 12px; cursor: pointer; border-radius: 5px; font-size: 14px; }
+        .tabs { display: flex; border-bottom: 2px solid #ddd; }
+        .tab-btn { flex: 1; padding: 16px; border: none; background: white; cursor: pointer; font-size: 14px; font-weight: bold; color: #333; transition: 0.3s; min-height: 55px; }
+        .tab-btn:active { opacity: 0.7; }
         .tab-btn.active { background: #3498db; color: white; }
-        .content { flex: 1; display: flex; overflow: hidden; }
-        .bible-container { flex: 1; display: flex; }
-        .sidebar { width: 120px; background: white; border-right: 1px solid #ddd; overflow-y: auto; padding: 8px; }
-        .book-btn { width: 100%; padding: 5px; margin-bottom: 2px; border: 1px solid #ddd; background: #f9f9f9; cursor: pointer; border-radius: 3px; font-size: 10px; text-align: left; }
-        .book-btn.active { background: #3498db; color: white; }
-        .main-area { flex: 1; display: flex; flex-direction: column; }
-        .chapter-btns { padding: 8px; background: white; border-bottom: 1px solid #ddd; display: grid; grid-template-columns: repeat(auto-fill, minmax(28px, 1fr)); gap: 3px; overflow-y: auto; max-height: 50px; }
-        .ch-btn { padding: 4px; border: 1px solid #ddd; background: #f9f9f9; cursor: pointer; border-radius: 3px; font-size: 10px; font-weight: bold; }
-        .ch-btn.active { background: #3498db; color: white; }
-        .verses { flex: 1; overflow-y: auto; padding: 15px; background: white; }
-        .verse { margin-bottom: 12px; line-height: 1.8; }
-        .verse-title { color: #666; font-size: 11px; margin-bottom: 3px; font-style: italic; }
-        .verse-text { font-size: 13px; }
-        .verse-num { color: #3498db; font-weight: bold; margin-right: 6px; }
-        .hymn-tab { padding: 15px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
-        .hymn-search { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; }
-        .hymn-container { flex: 1; overflow-y: auto; }
+        .controls-area { padding: 12px; background: white; border-bottom: 1px solid #ddd; }
+        select, input { padding: 10px; font-size: 14px; margin: 5px; border-radius: 5px; min-height: 44px; }
+        .content-area { flex: 1; overflow-y: auto; padding: 15px; background: white; }
+        .verse { margin-bottom: 16px; line-height: 1.8; }
+        .verse-title { font-size: 12px; margin-bottom: 4px; font-style: italic; }
+        .verse-text { font-size: 15px; }
+        .verse-num { color: #3498db; font-weight: bold; margin-right: 8px; }
         .hymn-display { text-align: center; padding: 20px; }
-        .hymn-image { max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 5px; }
-        .hymn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 8px; }
-        .hymn-num { padding: 12px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 5px; text-align: center; cursor: pointer; font-weight: bold; color: #3498db; font-size: 14px; }
+        .hymn-image { max-width: 100%; height: auto; border-radius: 5px; }
+        .hymn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 8px; padding: 10px 0; }
+        .hymn-num { padding: 14px; border-radius: 5px; text-align: center; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; min-height: 44px; }
+        .hymn-num:active { transform: scale(0.95); }
         .hymn-num.selected { background: #3498db; color: white; }
         .reading-tab { padding: 15px; flex: 1; overflow-y: auto; }
-        .reading-title { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 12px; }
-        .reading-date { font-size: 12px; color: #666; margin-bottom: 12px; }
-        .reading-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .reading-item { padding: 12px; background: #e8f4f8; border: 1px solid #3498db; border-radius: 5px; cursor: pointer; text-align: center; }
-        .reading-label { font-size: 11px; color: #666; margin-bottom: 4px; }
-        .reading-book { font-weight: bold; color: #2c3e50; }
+        .reading-title { font-size: 18px; font-weight: bold; margin-bottom: 12px; }
+        .reading-date { font-size: 13px; color: #666; margin-bottom: 16px; }
+        .reading-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .reading-item { padding: 16px; background: #e8f4f8; border: 2px solid #3498db; border-radius: 5px; cursor: pointer; text-align: center; min-height: 70px; display: flex; flex-direction: column; justify-content: center; transition: 0.2s; }
+        .reading-item:active { transform: scale(0.98); }
+        .reading-label { font-size: 12px; color: #666; margin-bottom: 6px; }
+        .reading-book { font-weight: bold; font-size: 15px; }
         .hidden { display: none !important; }
-        .tab-content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* 태블릿 최적화 */
+        @media (min-width: 600px) {
+            header h1 { font-size: 24px; }
+            .tab-btn { font-size: 16px; padding: 18px; min-height: 60px; }
+            .controls-area { padding: 16px; }
+            select, input { padding: 12px; font-size: 15px; min-height: 48px; }
+            .content-area { font-size: 16px; padding: 20px; }
+            .verse-text { font-size: 16px; }
+            .hymn-grid { grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); }
+            .hymn-num { padding: 16px; font-size: 16px; min-height: 50px; }
+            .reading-item { padding: 20px; min-height: 80px; }
+            .reading-book { font-size: 16px; }
+        }
+
+        @media (min-width: 900px) {
+            header h1 { font-size: 28px; }
+            .tab-btn { font-size: 17px; padding: 20px; }
+            .content-area { padding: 25px; }
+            .verse-text { font-size: 17px; }
+            .hymn-num { padding: 18px; font-size: 18px; }
+        }
     </style>
 </head>
-<body>
+<body class="light-theme">
     <div id="app">
         <header>
             <h1>📖 성경 · 찬송가</h1>
-            <p>개역개정 66권 + 645곡 찬송가</p>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙 다크</button>
         </header>
 
         <div class="tabs">
             <button class="tab-btn active" onclick="showTab('bible')">📖 성경</button>
             <button class="tab-btn" onclick="showTab('hymn')">🎵 찬송가</button>
-            <button class="tab-btn" onclick="showTab('reading')">📅 오늘의 맥체인 성경읽기</button>
+            <button class="tab-btn" onclick="showTab('reading')">📅 읽기</button>
         </div>
 
-        <div class="content">
-            <div id="bible" class="bible-container">
-                <div class="sidebar">
-                    <button class="book-btn active" onclick="setTestament('nt')">신약(27)</button>
-                    <button class="book-btn" onclick="setTestament('ot')">구약(39)</button>
-                    <hr style="margin: 6px 0; border: none; border-top: 1px solid #ddd;">
-                    <div id="bookList"></div>
+        <!-- 성경 탭 -->
+        <div id="bible-tab" class="tab-content">
+            <div class="controls-area">
+                <div>
+                    <button onclick="setTestament('nt')" style="padding: 10px 15px; margin-right: 10px; cursor: pointer; min-height: 44px; border: 2px solid #3498db; background: #3498db; color: white; border-radius: 5px; font-size: 14px;">신약(27)</button>
+                    <button onclick="setTestament('ot')" style="padding: 10px 15px; cursor: pointer; min-height: 44px; border: 2px solid #ddd; background: white; color: #333; border-radius: 5px; font-size: 14px;">구약(39)</button>
                 </div>
-                <div class="main-area">
-                    <div class="chapter-btns" id="chapterList"></div>
-                    <div class="verses" id="verseList"><p style="color: #999; text-align: center; padding: 20px;">📖 데이터 로딩 중...</p></div>
+                <div style="margin-top: 10px;">
+                    <select id="bookSelect" onchange="selectBook(this.value)" style="width: calc(100% - 20px);">
+                        <option value="">책 선택...</option>
+                    </select>
                 </div>
-            </div>
-
-            <div id="hymn" class="tab-content hidden">
-                <div class="hymn-tab">
-                    <input type="text" class="hymn-search" id="hymnSearch" placeholder="찬송가 번호 검색..." onkeyup="searchHymns()">
-                    <div class="hymn-container">
-                        <div class="hymn-display" id="hymnDisplay">
-                            <p style="color: #999;">번호를 검색하세요</p>
-                        </div>
-                        <div class="hymn-grid" id="hymnList"></div>
-                    </div>
+                <div style="margin-top: 10px;">
+                    <select id="chapterSelect" onchange="selectChapter(this.value)" style="width: calc(100% - 20px);">
+                        <option value="">장 선택...</option>
+                    </select>
                 </div>
             </div>
+            <div class="content-area" id="verseList">
+                <p style="text-align: center; color: #999;">📖 성경을 선택하세요</p>
+            </div>
+        </div>
 
-            <div id="reading" class="tab-content hidden">
-                <div class="reading-tab">
-                    <div class="reading-title">오늘의 맥체인 성경읽기</div>
-                    <div class="reading-date" id="todayDate"></div>
-                    <div class="reading-grid" id="readingList"></div>
+        <!-- 찬송가 탭 -->
+        <div id="hymn-tab" class="tab-content hidden">
+            <div class="controls-area">
+                <input type="number" id="hymnSearch" placeholder="찬송가 번호 (1-645)" onkeyup="searchHymns()" min="1" max="645" style="width: calc(100% - 20px);">
+            </div>
+            <div class="content-area" style="display: flex; flex-direction: column;">
+                <div class="hymn-display" id="hymnDisplay">
+                    <p style="color: #999;">번호를 검색하세요</p>
                 </div>
+                <div class="hymn-grid" id="hymnList"></div>
+            </div>
+        </div>
+
+        <!-- 오늘의 읽기 탭 -->
+        <div id="reading-tab" class="tab-content hidden">
+            <div class="reading-tab">
+                <div class="reading-title">오늘의 맥체인 성경읽기</div>
+                <div class="reading-date" id="todayDate"></div>
+                <div class="reading-grid" id="readingList"></div>
             </div>
         </div>
     </div>
@@ -106,6 +163,23 @@
         let currentChapter = 1;
         let selectedHymnNum = 0;
 
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('light-theme');
+            body.classList.toggle('dark-theme');
+            localStorage.setItem('theme', body.classList.contains('dark-theme') ? 'dark' : 'light');
+            document.querySelector('.theme-toggle').textContent = body.classList.contains('dark-theme') ? '☀️ 라이트' : '🌙 다크';
+        }
+
+        function loadTheme() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') {
+                document.body.classList.remove('light-theme');
+                document.body.classList.add('dark-theme');
+                document.querySelector('.theme-toggle').textContent = '☀️ 라이트';
+            }
+        }
+
         async function loadData() {
             try {
                 const url = 'https://raw.githubusercontent.com/8282elohim-debug/bible-app/main/bible_complete.json';
@@ -113,21 +187,31 @@
                 if (!response.ok) throw new Error('파일 로드 실패');
                 biblesData = await response.json();
                 
-                renderBooks();
-                renderChapters();
-                renderVerses();
-                searchHymns();
+                populateBookSelect();
                 initReading();
             } catch (e) {
                 console.error('오류:', e);
-                document.getElementById('verseList').innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">❌ 데이터 로드 오류</p>';
+                document.getElementById('verseList').innerHTML = '<p style="color: #999; text-align: center;">❌ 데이터 로드 오류</p>';
+            }
+        }
+
+        function populateBookSelect() {
+            const books = currentTestament === 'nt' ? BOOKS_NT : BOOKS_OT;
+            const select = document.getElementById('bookSelect');
+            select.innerHTML = '<option value="">책 선택...</option>';
+            for (let [abbr, name] of Object.entries(books)) {
+                const option = document.createElement('option');
+                option.value = abbr;
+                option.textContent = abbr + ' ' + name;
+                select.appendChild(option);
             }
         }
 
         function showTab(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(tab).classList.remove('hidden');
-            if (tab === 'bible') document.getElementById('bible').classList.remove('hidden');
+            if (tab === 'bible') document.getElementById('bible-tab').classList.remove('hidden');
+            else if (tab === 'hymn') document.getElementById('hymn-tab').classList.remove('hidden');
+            else if (tab === 'reading') document.getElementById('reading-tab').classList.remove('hidden');
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
         }
@@ -136,45 +220,39 @@
             currentTestament = type;
             currentBook = type === 'nt' ? '마' : '창';
             currentChapter = 1;
-            renderBooks();
-            renderChapters();
-            renderVerses();
-        }
-
-        function renderBooks() {
-            const books = currentTestament === 'nt' ? BOOKS_NT : BOOKS_OT;
-            let html = '';
-            for (let [abbr, name] of Object.entries(books)) {
-                html += `<button class="book-btn ${abbr === currentBook ? 'active' : ''}" onclick="selectBook('${abbr}')">${abbr}</button>`;
-            }
-            document.getElementById('bookList').innerHTML = html;
+            populateBookSelect();
+            populateChapterSelect();
+            document.querySelectorAll('button[onclick*="setTestament"]').forEach(btn => btn.style.background = btn.getAttribute('onclick').includes(type) ? '#3498db' : 'white');
+            document.querySelectorAll('button[onclick*="setTestament"]').forEach(btn => btn.style.color = btn.getAttribute('onclick').includes(type) ? 'white' : '#333');
+            document.querySelectorAll('button[onclick*="setTestament"]').forEach(btn => btn.style.borderColor = btn.getAttribute('onclick').includes(type) ? '#3498db' : '#ddd');
         }
 
         function selectBook(abbr) {
+            if (!abbr) return;
             currentBook = abbr;
             currentChapter = 1;
-            renderBooks();
-            renderChapters();
-            renderVerses();
+            populateChapterSelect();
         }
 
-        function renderChapters() {
+        function populateChapterSelect() {
             if (!biblesData) return;
             const books = currentTestament === 'nt' ? biblesData.ntBooks : biblesData.otBooks;
             const book = books[currentBook];
-            if (!book || !book.chapters) return;
+            if (!book) return;
             
-            let html = '';
+            const select = document.getElementById('chapterSelect');
+            select.innerHTML = '<option value="">장 선택...</option>';
             for (let ch in book.chapters) {
-                const num = parseInt(ch);
-                html += `<button class="ch-btn ${num === currentChapter ? 'active' : ''}" onclick="selectChapter(${num})">${num}</button>`;
+                const option = document.createElement('option');
+                option.value = ch;
+                option.textContent = ch + '장';
+                select.appendChild(option);
             }
-            document.getElementById('chapterList').innerHTML = html;
         }
 
         function selectChapter(ch) {
-            currentChapter = ch;
-            renderChapters();
+            if (!ch) return;
+            currentChapter = parseInt(ch);
             renderVerses();
         }
 
@@ -189,17 +267,17 @@
             const chapters = book.chapters;
             const verses = chapters[currentChapter];
             
-            let html = `<h3 style="color: #2c3e50; margin-bottom: 12px;">${bookName} ${currentChapter}장</h3>`;
+            let html = '<h3 style="color: #2c3e50; margin-bottom: 16px; font-size: 18px;">' + bookName + ' ' + currentChapter + '장</h3>';
             
             if (verses && verses.length > 0) {
                 verses.forEach(v => {
                     const verse = typeof v === 'string' ? JSON.parse(v) : v;
-                    html += `<div class="verse">`;
-                    if (verse.title) html += `<div class="verse-title">⟨${verse.title}⟩</div>`;
-                    html += `<div class="verse-text"><span class="verse-num">${currentBook}${currentChapter}:${verse.verse}</span> ${verse.content}</div></div>`;
+                    html += '<div class="verse">';
+                    if (verse.title) html += '<div class="verse-title">⟨' + verse.title + '⟩</div>';
+                    html += '<div class="verse-text"><span class="verse-num">' + currentBook + currentChapter + ':' + verse.verse + '</span> ' + verse.content + '</div></div>';
                 });
             } else {
-                html += `<p style="color: #999; margin-top: 20px;">📖 이 장의 데이터가 없습니다</p>`;
+                html += '<p style="color: #999; margin-top: 20px;">📖 이 장의 데이터가 없습니다</p>';
             }
             document.getElementById('verseList').innerHTML = html;
         }
@@ -210,7 +288,7 @@
             let end = 20;
             if (search) {
                 const num = parseInt(search);
-                if (!isNaN(num)) {
+                if (!isNaN(num) && num >= 1 && num <= 645) {
                     selectedHymnNum = num;
                     start = Math.max(1, num - 5);
                     end = Math.min(645, num + 15);
@@ -222,7 +300,7 @@
             }
             let html = '';
             for (let i = start; i <= end; i++) {
-                html += `<div class="hymn-num ${i === selectedHymnNum ? 'selected' : ''}" onclick="selectHymn(${i})">${i}</div>`;
+                html += '<div class="hymn-num ' + (i === selectedHymnNum ? 'selected' : '') + '" onclick="selectHymn(' + i + ')">' + i + '</div>';
             }
             document.getElementById('hymnList').innerHTML = html;
         }
@@ -232,13 +310,14 @@
             searchHymns();
         }
 
-       function displayHymnImage(num) {
-    const hymnDisplay = document.getElementById('hymnDisplay');
-    const paddedNum = String(num).padStart(3, '0');
-    const imageUrl = 'https://raw.githubusercontent.com/8282elohim-debug/bible-app/refs/heads/main/hymns/%E1%84%89%E1%85%A2%E1%84%8E%E1%85%A1%E1%86%AB%E1%84%89%E1%85%A9%E1%86%BC%E1%84%80%E1%85%A1_' + paddedNum + '.jpg';
-    
-    hymnDisplay.innerHTML = '<div><p style="margin-bottom: 10px; font-weight: bold; color: #2c3e50;">찬송가 ' + num + '번</p><img src="' + imageUrl + '" alt="찬송가 ' + num + '번" class="hymn-image" onerror="this.parentElement.innerHTML=\'<p style=&quot;color: #999;&quot;>이미지를 불러올 수 없습니다</p>\'"></div>';
-}
+        function displayHymnImage(num) {
+            const hymnDisplay = document.getElementById('hymnDisplay');
+            const paddedNum = String(num).padStart(3, '0');
+            const imageUrl = 'https://raw.githubusercontent.com/8282elohim-debug/bible-app/refs/heads/main/hymns/%E1%84%89%E1%85%A2%E1%84%8E%E1%85%A1%E1%86%AB%E1%84%89%E1%85%A9%E1%86%BC%E1%84%80%E1%85%A1_' + paddedNum + '.jpg';
+            
+            hymnDisplay.innerHTML = '<div><p style="margin-bottom: 12px; font-weight: bold; font-size: 16px;">찬송가 ' + num + '번</p><img src="' + imageUrl + '" alt="찬송가 ' + num + '번" class="hymn-image" onerror="this.parentElement.innerHTML=\'<p style=&quot;color: #999;&quot;>이미지를 불러올 수 없습니다</p>\'"></div>';
+        }
+
         function initReading() {
             if (!biblesData || !biblesData.readingPlan) return;
             
@@ -286,12 +365,17 @@
             currentBook = book;
             currentChapter = ch;
             document.querySelectorAll('.tab-btn')[0].click();
-            renderBooks();
-            renderChapters();
+            populateBookSelect();
+            populateChapterSelect();
+            document.getElementById('bookSelect').value = book;
+            document.getElementById('chapterSelect').value = ch;
             renderVerses();
         }
 
-        window.addEventListener('DOMContentLoaded', loadData);
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTheme();
+            loadData();
+        });
     </script>
 </body>
 </html>

@@ -28,11 +28,16 @@
         .verse-title { color: #666; font-size: 11px; margin-bottom: 3px; font-style: italic; }
         .verse-text { font-size: 13px; }
         .verse-num { color: #3498db; font-weight: bold; margin-right: 6px; }
-        .hymn-tab { padding: 15px; flex: 1; overflow-y: auto; }
+        .hymn-tab { padding: 15px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
         .hymn-search { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; }
+        .hymn-container { flex: 1; overflow-y: auto; }
+        .hymn-display { text-align: center; padding: 20px; }
+        .hymn-image { max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 5px; }
         .hymn-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 8px; }
         .hymn-num { padding: 12px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 5px; text-align: center; cursor: pointer; font-weight: bold; color: #3498db; font-size: 14px; }
+        .hymn-num.selected { background: #3498db; color: white; }
         .reading-tab { padding: 15px; flex: 1; overflow-y: auto; }
+        .reading-title { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 12px; }
         .reading-date { font-size: 12px; color: #666; margin-bottom: 12px; }
         .reading-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .reading-item { padding: 12px; background: #e8f4f8; border: 1px solid #3498db; border-radius: 5px; cursor: pointer; text-align: center; }
@@ -52,7 +57,7 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="showTab('bible')">📖 성경</button>
             <button class="tab-btn" onclick="showTab('hymn')">🎵 찬송가</button>
-            <button class="tab-btn" onclick="showTab('reading')">📅 오늘의 읽기</button>
+            <button class="tab-btn" onclick="showTab('reading')">📅 오늘의 맥체인 성경읽기</button>
         </div>
 
         <div class="content">
@@ -72,12 +77,18 @@
             <div id="hymn" class="tab-content hidden">
                 <div class="hymn-tab">
                     <input type="text" class="hymn-search" id="hymnSearch" placeholder="찬송가 번호 검색..." onkeyup="searchHymns()">
-                    <div class="hymn-grid" id="hymnList"></div>
+                    <div class="hymn-container">
+                        <div class="hymn-display" id="hymnDisplay">
+                            <p style="color: #999;">번호를 검색하세요</p>
+                        </div>
+                        <div class="hymn-grid" id="hymnList"></div>
+                    </div>
                 </div>
             </div>
 
             <div id="reading" class="tab-content hidden">
                 <div class="reading-tab">
+                    <div class="reading-title">오늘의 맥체인 성경읽기</div>
                     <div class="reading-date" id="todayDate"></div>
                     <div class="reading-grid" id="readingList"></div>
                 </div>
@@ -91,6 +102,7 @@
         
         let biblesData = null;
         let currentTestament = 'nt', currentBook = '마', currentChapter = 1;
+        let selectedHymnNum = 0;
 
         async function loadData() {
             try {
@@ -196,15 +208,38 @@
             if (search) {
                 const num = parseInt(search);
                 if (!isNaN(num)) {
+                    selectedHymnNum = num;
                     start = Math.max(1, num - 5);
                     end = Math.min(645, num + 15);
+                    displayHymnImage(num);
                 }
+            } else {
+                selectedHymnNum = 0;
+                document.getElementById('hymnDisplay').innerHTML = '<p style="color: #999;">번호를 검색하세요</p>';
             }
             let html = '';
             for (let i = start; i <= end; i++) {
-                html += `<div class="hymn-num">${i}</div>`;
+                html += `<div class="hymn-num ${i === selectedHymnNum ? 'selected' : ''}" onclick="selectHymn(${i})">${i}</div>`;
             }
             document.getElementById('hymnList').innerHTML = html;
+        }
+
+        function selectHymn(num) {
+            document.getElementById('hymnSearch').value = num;
+            searchHymns();
+        }
+
+        function displayHymnImage(num) {
+            const hymnDisplay = document.getElementById('hymnDisplay');
+            const paddedNum = String(num).padStart(3, '0');
+            const imageUrl = `https://raw.githubusercontent.com/8282elohim-debug/bible-app/main/hymns/${paddedNum}.jpg`;
+            
+            hymnDisplay.innerHTML = `
+                <div>
+                    <p style="margin-bottom: 10px; font-weight: bold; color: #2c3e50;">찬송가 ${num}번</p>
+                    <img src="${imageUrl}" alt="찬송가 ${num}번" class="hymn-image" onerror="this.parentElement.innerHTML='<p style=\"color: #999;\">이미지를 불러올 수 없습니다 (나중에 업로드됨)</p>'">
+                </div>
+            `;
         }
 
         function initReading() {
@@ -229,11 +264,22 @@
                 let html = '';
                 items.forEach(item => {
                     if (!item.c) return;
-                    const m = item.c.match(/^([가-힣]+)(\d+)/);
+                    const m = item.c.match(/^([가-힣]+)(\d+)(?::(\d+)~(\d+))?/);
                     if (m) {
                         const b = m[1], ch = parseInt(m[2]);
+                        const startVerse = m[3] ? parseInt(m[3]) : null;
+                        const endVerse = m[4] ? parseInt(m[4]) : null;
                         const bn = BOOKS_OT[b] || BOOKS_NT[b] || b;
-                        html += `<div class="reading-item" onclick="goToVerse('${b}', ${ch})"><div class="reading-label">${item.l}</div><div class="reading-book">${bn} ${ch}장</div></div>`;
+                        
+                        let rangeText = `${bn} ${ch}장`;
+                        if (startVerse && endVerse) {
+                            rangeText = `${bn} ${ch}:${startVerse}~${endVerse}`;
+                        }
+                        
+                        html += `<div class="reading-item" onclick="goToVerse('${b}', ${ch})">
+                            <div class="reading-label">${item.l}</div>
+                            <div class="reading-book">${rangeText}</div>
+                        </div>`;
                     }
                 });
                 document.getElementById('readingList').innerHTML = html;

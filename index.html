@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📖 성경·찬송가 - 개역개정 성경 + 645곡 찬송가</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: #f5f5f5;
+        }
+        
+        #root {
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        function BibleApp() {
+            const BIBLE_DATA = {
+                ot: {
+                    '창': { name: '창세기', chapters: 50 },
+                    '출': { name: '출애굽기', chapters: 40 },
+                    '레': { name: '레위기', chapters: 27 },
+                    '민': { name: '민수기', chapters: 36 },
+                    '신': { name: '신명기', chapters: 34 },
+                    '수': { name: '여호수아', chapters: 24 },
+                    '삿': { name: '사사기', chapters: 21 },
+                    '룻': { name: '룻기', chapters: 4 },
+                    '삼상': { name: '사무엘상', chapters: 31 },
+                    '삼하': { name: '사무엘하', chapters: 24 },
+                    '왕상': { name: '열왕기상', chapters: 22 },
+                    '왕하': { name: '열왕기하', chapters: 25 },
+                    '대상': { name: '역대상', chapters: 29 },
+                    '대하': { name: '역대하', chapters: 36 },
+                    '스': { name: '에스라', chapters: 10 },
+                    '느': { name: '느헤미야', chapters: 13 },
+                    '에': { name: '에스더', chapters: 10 },
+                    '욥': { name: '욥기', chapters: 42 },
+                    '시': { name: '시편', chapters: 150 },
+                    '잠': { name: '잠언', chapters: 31 },
+                    '전': { name: '전도서', chapters: 12 },
+                    '아': { name: '아가', chapters: 8 },
+                    '사': { name: '이사야', chapters: 66 },
+                    '렘': { name: '예레미야', chapters: 52 },
+                    '애': { name: '예레미야애가', chapters: 5 },
+                    '겔': { name: '에스겔', chapters: 48 },
+                    '단': { name: '다니엘', chapters: 12 },
+                    '호': { name: '호세아', chapters: 14 },
+                    '욜': { name: '요엘', chapters: 3 },
+                    '암': { name: '아모스', chapters: 9 },
+                    '옵': { name: '오바댜', chapters: 1 },
+                    '욘': { name: '요나', chapters: 4 },
+                    '미': { name: '미가', chapters: 7 },
+                    '나': { name: '나훔', chapters: 3 },
+                    '합': { name: '하박국', chapters: 3 },
+                    '습': { name: '스바냐', chapters: 3 },
+                    '학': { name: '학개', chapters: 2 },
+                    '슥': { name: '스가랴', chapters: 14 },
+                    '말': { name: '말라기', chapters: 4 },
+                },
+                nt: {
+                    '마': { name: '마태복음', chapters: 28 },
+                    '막': { name: '마가복음', chapters: 16 },
+                    '눅': { name: '누가복음', chapters: 24 },
+                    '요': { name: '요한복음', chapters: 21 },
+                    '행': { name: '사도행전', chapters: 28 },
+                    '롬': { name: '로마서', chapters: 16 },
+                    '고전': { name: '고린도전서', chapters: 16 },
+                    '고후': { name: '고린도후서', chapters: 13 },
+                    '갈': { name: '갈라디아서', chapters: 6 },
+                    '엡': { name: '에베소서', chapters: 6 },
+                    '빌': { name: '빌립보서', chapters: 4 },
+                    '골': { name: '골로새서', chapters: 4 },
+                    '살전': { name: '데살로니가전서', chapters: 5 },
+                    '살후': { name: '데살로니가후서', chapters: 3 },
+                    '딤전': { name: '디모데전서', chapters: 6 },
+                    '딤후': { name: '디모데후서', chapters: 4 },
+                    '딛': { name: '디도서', chapters: 3 },
+                    '몬': { name: '빌레몬서', chapters: 1 },
+                    '히': { name: '히브리서', chapters: 13 },
+                    '약': { name: '야고보서', chapters: 5 },
+                    '벧전': { name: '베드로전서', chapters: 5 },
+                    '벧후': { name: '베드로후서', chapters: 3 },
+                    '요일': { name: '요한일서', chapters: 5 },
+                    '요이': { name: '요한이서', chapters: 1 },
+                    '요삼': { name: '요한삼서', chapters: 1 },
+                    '유': { name: '유다서', chapters: 1 },
+                    '계': { name: '요한계시록', chapters: 22 },
+                }
+            };
+
+            const [activeTab, setActiveTab] = useState('bible');
+            const [testament, setTestament] = useState('nt');
+            const [selectedBook, setSelectedBook] = useState('마');
+            const [selectedChapter, setSelectedChapter] = useState(1);
+            const [hymnSearch, setHymnSearch] = useState('');
+
+            const bibleBooks = testament === 'nt' ? BIBLE_DATA.nt : BIBLE_DATA.ot;
+            const currentBook = bibleBooks[selectedBook] || { name: '책 없음', chapters: 0 };
+
+            const bookNameMap = {
+                '창': '창세기', '출': '출애굽기', '레': '레위기', '민': '민수기', '신': '신명기',
+                '수': '여호수아', '삿': '사사기', '룻': '룻기', '삼상': '사무엘상', '삼하': '사무엘하',
+                '왕상': '열왕기상', '왕하': '열왕기하', '대상': '역대상', '대하': '역대하',
+                '스': '에스라', '느': '느헤미야', '에': '에스더', '욥': '욥기', '시': '시편',
+                '잠': '잠언', '전': '전도서', '아': '아가', '사': '이사야', '렘': '예레미야',
+                '애': '예레미야애가', '겔': '에스겔', '단': '다니엘', '호': '호세아', '욜': '요엘',
+                '암': '아모스', '옵': '오바댜', '욘': '요나', '미': '미가', '나': '나훔',
+                '합': '하박국', '습': '스바냐', '학': '학개', '슥': '스가랴', '말': '말라기',
+                '마': '마태복음', '막': '마가복음', '눅': '누가복음', '요': '요한복음',
+                '행': '사도행전', '롬': '로마서', '고전': '고린도전서', '고후': '고린도후서',
+                '갈': '갈라디아서', '엡': '에베소서', '빌': '빌립보서', '골': '골로새서',
+                '살전': '데살로니가전서', '살후': '데살로니가후서', '딤전': '디모데전서',
+                '딤후': '디모데후서', '딛': '디도서', '몬': '빌레몬서', '히': '히브리서',
+                '약': '야고보서', '벧전': '베드로전서', '벧후': '베드로후서', '요일': '요한일서',
+                '요이': '요한이서', '요삼': '요한삼서', '유': '유다서', '계': '요한계시록'
+            };
+
+            const handleReadingClick = (bookCode) => {
+                const match = bookCode.match(/^([가-힣]+)(\d+)$/);
+                if (match) {
+                    const book = match[1];
+                    const chapter = parseInt(match[2]);
+                    const isOT = BIBLE_DATA.ot[book];
+                    const isNT = BIBLE_DATA.nt[book];
+                    
+                    if (isOT) {
+                        setTestament('ot');
+                        setSelectedBook(book);
+                        setSelectedChapter(chapter);
+                    } else if (isNT) {
+                        setTestament('nt');
+                        setSelectedBook(book);
+                        setSelectedChapter(chapter);
+                    }
+                    setActiveTab('bible');
+                }
+            };
+
+            const hymns = Array.from({ length: 645 }, (_, i) => ({ num: i + 1 }));
+            const searchedHymns = useMemo(() => {
+                if (!hymnSearch) return hymns.slice(0, 12);
+                return hymns.filter(h => h.num.toString().includes(hymnSearch)).slice(0, 20);
+            }, [hymnSearch]);
+
+            const today = new Date();
+            const readings = {
+                '1월1일': { ot1: '창1', nt: '마1', ot2: '스1', acts: '행1' },
+                '1월2일': { ot1: '창2', nt: '마2', ot2: '스2', acts: '행2' },
+                '2월1일': { ot1: '창8', nt: '마7', ot2: '스10', acts: '행8' },
+            };
+            const todayKey = `${today.getMonth() + 1}월${today.getDate()}일`;
+            const todayReading = readings[todayKey];
+
+            return (
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#f5f5f5' }}>
+                    <div style={{ backgroundColor: '#2c3e50', color: 'white', padding: '12px 16px', textAlign: 'center' }}>
+                        <h1 style={{ margin: '0 0 4px 0', fontSize: '18px' }}>📖 성경 · 찬송가</h1>
+                        <p style={{ margin: 0, fontSize: '12px', opacity: 0.8 }}>개역개정 66권 + 645곡 찬송가</p>
+                    </div>
+
+                    <div style={{ display: 'flex', borderBottom: '2px solid #ddd', backgroundColor: 'white' }}>
+                        {[
+                            { id: 'bible', label: '📖 성경' },
+                            { id: 'hymn', label: '🎵 찬송가' },
+                            { id: 'reading', label: '📅 오늘의 읽기' }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                style={{
+                                    flex: 1,
+                                    padding: '12px',
+                                    border: 'none',
+                                    backgroundColor: activeTab === tab.id ? '#3498db' : 'white',
+                                    color: activeTab === tab.id ? 'white' : '#333',
+                                    cursor: 'pointer',
+                                    fontSize: '14px',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div style={{ flex: 1, overflow: 'auto', display: 'flex' }}>
+                        {activeTab === 'bible' && (
+                            <>
+                                <div style={{ width: '150px', backgroundColor: 'white', borderRight: '1px solid #ddd', overflowY: 'auto', padding: '8px' }}>
+                                    <button onClick={() => setTestament('ot')} style={{ width: '100%', padding: '6px', marginBottom: '4px', backgroundColor: testament === 'ot' ? '#3498db' : '#ecf0f1', color: testament === 'ot' ? 'white' : '#333', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>구약 (39)</button>
+                                    <button onClick={() => setTestament('nt')} style={{ width: '100%', padding: '6px', marginBottom: '8px', backgroundColor: testament === 'nt' ? '#3498db' : '#ecf0f1', color: testament === 'nt' ? 'white' : '#333', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>신약 (27)</button>
+                                    
+                                    {Object.entries(bibleBooks).map(([abbr, book]) => (
+                                        <button key={abbr} onClick={() => { setSelectedBook(abbr); setSelectedChapter(1); }} style={{ width: '100%', padding: '4px 6px', marginBottom: '2px', backgroundColor: selectedBook === abbr ? '#3498db' : '#f9f9f9', color: selectedBook === abbr ? 'white' : '#333', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', textAlign: 'left' }}><strong>{abbr}</strong> {book.name.slice(0, 5)}</button>
+                                    ))}
+                                </div>
+
+                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                    <div style={{ padding: '8px 12px', borderBottom: '1px solid #ddd', backgroundColor: 'white', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(28px, 1fr))', gap: '4px' }}>
+                                        {Array.from({ length: currentBook.chapters }, (_, i) => i + 1).map(ch => (
+                                            <button key={ch} onClick={() => setSelectedChapter(ch)} style={{ padding: '4px', backgroundColor: selectedChapter === ch ? '#3498db' : '#ecf0f1', color: selectedChapter === ch ? 'white' : '#333', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}>{ch}</button>
+                                        ))}
+                                    </div>
+                                    <div style={{ flex: 1, overflowY: 'auto', padding: '12px', backgroundColor: 'white' }}>
+                                        <p style={{ fontWeight: 'bold', marginBottom: '12px' }}>{currentBook.name} {selectedChapter}장</p>
+                                        <p style={{ color: '#666', fontSize: '12px' }}>📖 전체 성경 구절은 로컬 버전 또는 JSON 파일과 함께 사용됩니다.</p>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        {activeTab === 'hymn' && (
+                            <div style={{ flex: 1, padding: '12px' }}>
+                                <input type="text" placeholder="찬송가 번호 검색..." value={hymnSearch} onChange={(e) => setHymnSearch(e.target.value)} style={{ width: '100%', padding: '8px', marginBottom: '12px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '12px' }} />
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '8px' }}>
+                                    {searchedHymns.map(h => (
+                                        <div key={h.num} style={{ padding: '12px', backgroundColor: '#f9f9f9', border: '1px solid #ddd', borderRadius: '8px', cursor: 'pointer', textAlign: 'center' }}>
+                                            <div style={{ fontWeight: 'bold', color: '#3498db', fontSize: '14px' }}>{h.num}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'reading' && (
+                            <div style={{ flex: 1, padding: '16px' }}>
+                                <p style={{ fontSize: '12px', color: '#666', marginBottom: '12px' }}>{today.getFullYear()}년 {today.getMonth() + 1}월 {today.getDate()}일</p>
+                                {todayReading ? (
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+                                        {[
+                                            { label: '구약 1', value: todayReading.ot1 },
+                                            { label: '신약', value: todayReading.nt },
+                                            { label: '구약 2', value: todayReading.ot2 },
+                                            { label: '사도행전', value: todayReading.acts }
+                                        ].map(item => (
+                                            <button key={item.label} onClick={() => handleReadingClick(item.value)} style={{ padding: '12px', backgroundColor: '#e8f4f8', border: '1px solid #3498db', borderRadius: '8px', cursor: 'pointer', textAlign: 'center' }}>
+                                                <div style={{ fontSize: '11px', color: '#666', marginBottom: '4px' }}>{item.label}</div>
+                                                <div style={{ fontWeight: 'bold', color: '#333' }}>{bookNameMap[item.value.match(/^([가-힣]+)/)?.[1]]} {item.value.match(/\d+$/)?.[0]}장</div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div style={{ padding: '16px', backgroundColor: '#f9f9f9', borderRadius: '8px', textAlign: 'center', color: '#666' }}>오늘의 읽기 계획이 없습니다.</div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<BibleApp />);
+    </script>
+</body>
+</html>
